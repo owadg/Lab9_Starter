@@ -86,8 +86,15 @@
       <button>Trigger a Global Error</button>
     </section>
   </main>
-
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
   <script>
+    window.TrackJS && TrackJS.install({
+      token: "fc6651a9327f4c63aa475f555a46689c"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>
+  <script>
+    window.addEventListener('error', ((e) => TrackJS.track(e)));
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -96,12 +103,62 @@
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
       output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      trigger();
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
     // Start your code here
     // You may move this JS to another file if you wish
+    errorBtns[0].addEventListener('click', () => console.log("This outputs text to the console."));
+    errorBtns[1].addEventListener('click', () => console.error("oh no, there was an issue!~"));
+    errorBtns[2].addEventListener('click', () => console.count("count button"));
+    errorBtns[3].addEventListener('click', () => console.warn("This button is finicky, careful. Don't press it wrong."));
+    errorBtns[4].addEventListener('click', () => console.assert(5 > 6, "This assertion will always fail, since 5 is not greater than 6."));
+    errorBtns[5].addEventListener('click', () => console.clear());
+    errorBtns[6].addEventListener('click', () => console.dir(errorBtns));
+    errorBtns[7].addEventListener('click', () => console.dirxml(document.querySelector('body')));
+    errorBtns[8].addEventListener('click', () => console.group());
+    errorBtns[9].addEventListener('click', () => console.groupEnd());
+    errorBtns[10].addEventListener('click', () => console.table(["hi, im index 1", "and my name is index 2", "okay. im index 3 then."]));
+    errorBtns[11].addEventListener('click', () => console.time('timer button pressed'));
+    errorBtns[12].addEventListener('click', () => console.timeEnd('timer button pressed'));
+    errorBtns[13].addEventListener('click', () => console.trace());
+    errorBtns[14].addEventListener('click', () => yew);
+
+    class AsyncError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "AsyncError";
+      }
+    }
+
+    function trigger() {
+      // we will call an async function but not await it or use then()
+      try {
+        str = basasync();
+
+        if (str != 'ABCDEFGHI THIS IS AN ERROR') {
+          throw new AsyncError("Expected a string, not a promise");
+        }
+      } catch (error) {
+        if (error instanceof AsyncError) {
+          console.error('next time use the await keyword');
+          console.trace()
+        } else {
+          throw error;
+        }
+      } finally {
+        console.log('almost done!')
+      }
+
+      return str;
+    }
+
+    async function basasync() {
+      return 'ABCDEFGHI THIS IS AN ERROR';
+    }
+
   </script>
 </body>
 
